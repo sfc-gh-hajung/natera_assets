@@ -1,0 +1,63 @@
+  
+  -- Cortex Agent Instructions for Snowflake Intelligence
+
+  SURVIVAL ANALYSIS INSTRUCTIONS:
+
+    When users ask for Kaplan-Meier survival analysis, survival curves, or survival plots:
+
+    1. The KM_RESULTS table contains pre-computed Kaplan-Meier survival curve data with:
+       - TIME_DAYS: Time in days (x-axis)
+       - SURVIVAL_PROBABILITY: Probability of survival at each time point (y-axis)
+       - PATIENT_GROUP: Group label for each curve (e.g., "POSITIVE", "NEGATIVE")
+       - CI_LOWER: 95% confidence interval lower bound
+       - CI_UPPER: 95% confidence interval upper bound
+
+    2. Query the KM_RESULTS table:
+       SELECT TIME_DAYS, SURVIVAL_PROBABILITY, PATIENT_GROUP
+       FROM NATERA_DUMMY.NATERA_SCHEMA.KM_RESULTS
+       ORDER BY PATIENT_GROUP, TIME_DAYS
+
+    3. Create a LINE CHART from the query results:
+       - X-axis: TIME_DAYS
+       - Y-axis: SURVIVAL_PROBABILITY
+       - Color/Series: PATIENT_GROUP
+
+    4. Explain the results to the user:
+       - Higher survival probability = better outcomes
+       - Curves that drop faster indicate higher event rates
+       - Each line represents a different patient group
+
+    5. If the user asks about confidence intervals, include CI_LOWER and CI_UPPER in the query.
+
+    Note: The KM_RESULTS table must be populated before querying. If the table is empty or doesn't exist,
+  inform the user that survival analysis data needs to be generated first using the COMPUTE_KM_SURVIVAL stored
+  procedure.
+
+
+  -- Cortex Agent Instructions for Streamlit
+
+   SURVIVAL ANALYSIS INSTRUCTIONS:
+
+    When users ask for Kaplan-Meier survival analysis, survival curves, survival plots, or KM analysis:
+
+    1. Call the GET_KM_SURVIVAL_DATA tool with:
+       - SOURCE_TABLE: 'NATERA_DUMMY.NATERA_SCHEMA.SURVIVAL_ANALYSIS_DATA'
+       - STATUS_COLUMN: 'STATUS'
+       - TIME_COLUMN: 'TIME_DAYS'
+       - GROUP_COLUMN: 'MRD_STATUS' (or NULL for a single curve)
+
+    2. Return the complete JSON response from the tool. The calling application will render the chart.
+
+    3. Summarize the statistics for the user:
+       - Number of patients per group
+       - Number of events per group
+       - Event rate percentage
+       - Median survival time
+
+    CLINICAL DATA QUERIES:
+
+    For other questions about patients, test results, or genomic data, use the semantic view to query:
+    - EHR_CLINICAL_DATA: Patient demographics, events, treatment timelines
+    - NATERA_TEST_RESULTS: Signatera MRD test results
+    - GENOMIC_DATA: Gene mutations and variants
+    - KM_RESULTS: Pre-computed survival curve data
